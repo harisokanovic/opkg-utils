@@ -387,7 +387,7 @@ class Package:
         file.write(str(self))
         file.close()
 
-        cmd = "cd %s ; tar cvfz %s/control.tar.gz control" % (self.meta_dir,
+        cmd = "cd %s ; tar cvz --format=gnu -f %s/control.tar.gz control" % (self.meta_dir,
                                                               self.scratch_dir)
 
         cmd_out, cmd_in, cmd_err = os.popen3(cmd)
@@ -402,7 +402,7 @@ class Package:
         bits = "control.tar.gz"
 
         if self.file_list:
-                cmd = "cd %s ; tar cvfz %s/data.tar.gz" % (self.file_dir,
+                cmd = "cd %s ; tar cvz --format=gnu -f %s/data.tar.gz" % (self.file_dir,
                                                               self.scratch_dir)
 
                 cmd_out, cmd_in, cmd_err = os.popen3(cmd)
@@ -417,7 +417,7 @@ class Package:
                 bits = bits + " data.tar.gz"
 
         file = "%s_%s_%s.%s" % (self.package, self.version, self.architecture, self.get_package_extension())
-        cmd = "cd %s ; tar cvfz %s/%s %s" % (self.scratch_dir,
+        cmd = "cd %s ; tar cvz --format=gnu -f %s/%s %s" % (self.scratch_dir,
                                              dirname,
                                              file,
                                              bits)
