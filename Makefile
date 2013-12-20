@@ -1,6 +1,6 @@
 UTILS = opkg-build opkg-unbuild opkg-compare-versions opkg-make-index opkg.py \
         opkg-list-fields arfile.py opkg-buildpackage opkg-diff opkg-extract-file opkg-show-deps \
-        opkg-compare-indexes opkg-compare-versions.sh
+        opkg-compare-indexes opkg-compare-versions.sh update-alternatives
 
 DESTDIR=
 PREFIX=/usr/local
