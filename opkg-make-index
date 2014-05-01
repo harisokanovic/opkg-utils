@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys, os, posixpath
-from glob import glob
 import subprocess
 import opkg
 import getopt
@@ -92,32 +91,40 @@ if old_filename:
 
 if (verbose):
      sys.stderr.write("Reading in all the package info from %s\n" % (pkg_dir, ))
-files=glob(pkg_dir + '/*.opk') + glob(pkg_dir + '/*.deb') + glob(pkg_dir + '/*.ipk')
+
+files=[]
+opkg_extensions=['.ipk','.opk','.deb']
+for dirpath, dirnames, filenames in os.walk(pkg_dir):
+    for f in filenames:
+        ext = os.path.splitext(f)[1]
+        if ext in opkg_extensions:
+            files.append(os.path.join(dirpath, f))
+
 files.sort()
-for filename in files:
+for abspath in files:
   try:
-     basename = os.path.basename(filename)
+     filename = os.path.relpath(abspath, pkg_dir)
      pkg = None
-     fnameStat = os.stat(filename)
-     if basename in old_pkg_hash:
-          if basename in pkgsStamps and int(fnameStat.st_mtime) == pkgsStamps[basename]:
+     fnameStat = os.stat(abspath)
+     if filename in old_pkg_hash:
+          if filename in pkgsStamps and int(fnameStat.st_mtime) == pkgsStamps[filename]:
             if (verbose):
                sys.stderr.write("Found %s in Packages\n" % (filename,))
-            pkg = old_pkg_hash[basename]
+            pkg = old_pkg_hash[filename]
           else:
                sys.stderr.write("Found %s in Packages, but mtime differs - re-reading\n" % (filename,))
 
      if not pkg:
           if (verbose):
                sys.stderr.write("Reading info for package %s\n" % (filename,))
-          pkg = opkg.Package(filename)
+          pkg = opkg.Package(abspath, relpath=pkg_dir)
      pkg_key = ("%s:%s" % (pkg.package, pkg.architecture))
      if (pkg_key in packages.packages):
           old_filename = packages.packages[pkg_key].filename
      else:
           old_filename = ""
      s = packages.add_package(pkg)
-     pkgsStamps[basename] = fnameStat.st_mtime
+     pkgsStamps[filename] = fnameStat.st_mtime
      if s == 0:
           if old_filename:
                # old package was displaced by newer
@@ -127,7 +134,7 @@ for filename in files:
                     print(("%s/%s" % (pkg_dir, old_filename)))
      else:
           if opt_m:
-               to_morgue(basename)
+               to_morgue(filename)
           if opt_s:
                print(filename)
   except OSError as e:
