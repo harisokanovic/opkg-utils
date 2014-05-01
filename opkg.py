@@ -116,7 +116,12 @@ def parse_version(versionstr):
 class Package:
     """A class for creating objects to manipulate (e.g. create) opkg
        packages."""
-    def __init__(self, fn=None):
+
+    # fn: Package file path
+    # relpath: If this argument is set, the file path is given relative to this
+    #   path when a string representation of the Package object is created. If
+    #   this argument is not set, the basename of the file path is given.
+    def __init__(self, fn=None, relpath=None):
         self.package = None
         self.version = 'none'
         self.parsed_version = None
@@ -150,7 +155,10 @@ class Package:
             # see if it is deb format
             f = open(fn, "rb")
 
-            self.filename = os.path.basename(fn)
+            if relpath:
+                self.filename = os.path.relpath(fn, relpath)
+            else:
+                self.filename = os.path.basename(fn)
 
             ## sys.stderr.write("  extracting control.tar.gz from %s\n"% (fn,)) 
 
