@@ -159,6 +159,23 @@ ogargs=""
 outer=ar
 noclean=0
 opkext=0
+
+# Determine if tar supports the --format argument by checking the help output.
+#
+# This is needed because:
+#    - Busybox tar doesn't support '--format'
+#    - On some Linux distros, tar now defaults to posix format if '--format' is
+#      explictly specified
+#    - Opkg doesn't currently support posix format archives
+#
+# It's easier to check for mention of the '--format' option than to detect the
+# tar implementation and maintain a list of which support '--format'.
+tarformat=""
+if tar --help 2>&1 | grep -- "--format" > /dev/null;
+then
+    tarformat="--format=gnu"
+fi
+
 usage="Usage: $0 [-c] [-C] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
 while getopts "cCg:ho:vO" opt; do
     case $opt in
@@ -233,8 +250,8 @@ tmp_dir=$dest_dir/IPKG_BUILD.$$
 mkdir $tmp_dir
 
 echo $CONTROL > $tmp_dir/tarX
-( cd $pkg_dir && tar $ogargs -X $tmp_dir/tarX -cz --format=gnu -f $tmp_dir/data.tar.gz . )
-( cd $pkg_dir/$CONTROL && tar $ogargs -cz --format=gnu -f $tmp_dir/control.tar.gz . )
+( cd $pkg_dir && tar $ogargs -X $tmp_dir/tarX -cz $tarformat -f $tmp_dir/data.tar.gz . )
+( cd $pkg_dir/$CONTROL && tar $ogargs -cz $tarformat -f $tmp_dir/control.tar.gz . )
 rm $tmp_dir/tarX
 
 echo "2.0" > $tmp_dir/debian-binary
@@ -249,7 +266,7 @@ rm -f $pkg_file
 if [ "$outer" = "ar" ] ; then
   ( cd $tmp_dir && ar -crf $pkg_file ./debian-binary ./control.tar.gz ./data.tar.gz )
 else
-  ( cd $tmp_dir && tar -cz --format=gnu -f $pkg_file ./debian-binary ./control.tar.gz ./data.tar.gz )
+  ( cd $tmp_dir && tar -cz $tarformat -f $pkg_file ./debian-binary ./control.tar.gz ./data.tar.gz )
 fi
 
 rm $tmp_dir/debian-binary $tmp_dir/data.tar.gz $tmp_dir/control.tar.gz
