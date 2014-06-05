@@ -164,8 +164,8 @@ opkext=0
 #
 # This is needed because:
 #    - Busybox tar doesn't support '--format'
-#    - On some Linux distros, tar now defaults to posix format if '--format' is
-#      explictly specified
+#    - On some Linux distros, tar now defaults to posix format if '--format'
+#      isn't explictly specified
 #    - Opkg doesn't currently support posix format archives
 #
 # It's easier to check for mention of the '--format' option than to detect the
