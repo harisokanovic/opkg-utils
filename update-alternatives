@@ -68,6 +68,10 @@ protect_slashes() {
 	sed -e 's/\//\\\//g'
 }
 
+protect_special_character() {
+	sed -e 's/\[/\\\[/g'
+}
+
 remove_alt() {
 	[ $# -lt 2 ] && return 1
 	local name="$1"
@@ -75,7 +79,7 @@ remove_alt() {
 
 	[ ! -f $ad/$name ] && return 0
 
-	path=`echo $path | protect_slashes`
+	path=`echo $path | protect_slashes | protect_special_character`
 	sed -ne "/^$path\>.*/!p" $ad/$name > $ad/$name.new
 	mv $ad/$name.new $ad/$name
 }
