@@ -57,21 +57,24 @@ def find_package(name):
           return provider_hash[name]
      return None
 
+def process_dep(dep):
+     dep = re.sub("\s*\(.*\)", "", dep)
+     dep = re.sub("\*$", "", dep)
+     newpkgs = find_package(dep)
+     if newpkgs:
+          for newpkg in newpkgs:
+               if newpkg.package in required:
+                    return
+          recurse(newpkgs[0])
+     else:
+          sys.stderr.write("unsatisfied dependency of %s on '%s'\n" % (pkg.package, dep))
+
 def recurse(pkg):
      required[pkg.package] = 1
      if pkg.depends:
           deps = split_list(pkg.depends)
           for dep in deps:
-               dep = re.sub("\s*\(.*\)", "", dep)
-               dep = re.sub("\*$", "", dep)
-               newpkgs = find_package(dep)
-               if newpkgs:
-                    for newpkg in newpkgs:
-	                 if newpkg.package in required:
-			      return
-                    recurse(newpkgs[0])
-               else:
-                    sys.stderr.write("unsatisfied dependency of %s on '%s'\n" % (pkg.package, dep))
+               process_dep(dep)
 
 for root in remaining_args:
      pkgs = find_package(root)
