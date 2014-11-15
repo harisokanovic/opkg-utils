@@ -53,23 +53,32 @@ for i in list(packages.packages.keys()):
                provider_hash[prov].append(p)
 
 def find_package(name):
+     # Return all providers of the named package
      if name in provider_hash:
           return provider_hash[name]
      return None
 
 def process_dep(dep):
+     # Add a provider of the given dependency to the list of required packages
+     # unless a provider is already present in this list.
      dep = re.sub("\s*\(.*\)", "", dep)
      dep = re.sub("\*$", "", dep)
      newpkgs = find_package(dep)
      if newpkgs:
+          # Loop over all providers of the dependency and return early if any
+          # provider is already in the list of required pacakges - we only need
+          # one provider of this dependency.
           for newpkg in newpkgs:
                if newpkg.package in required:
                     return
+          # Select the first provider, add it to the required packages list and
+          # process its dependencies
           recurse(newpkgs[0])
      else:
           sys.stderr.write("unsatisfied dependency of %s on '%s'\n" % (pkg.package, dep))
 
 def recurse(pkg):
+     # Add a package to the required list and process its dependencies
      required[pkg.package] = 1
      if pkg.depends:
           deps = split_list(pkg.depends)
