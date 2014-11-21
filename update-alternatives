@@ -97,7 +97,7 @@ find_best_alt() {
 	[ $# -lt 1 ] && return 1
 	[ ! -f $ad/$name ] && return 0
 
-	link=$OPKG_OFFLINE_ROOT/`head -n 1 $ad/$name`
+	link=$OPKG_OFFLINE_ROOT`head -n 1 $ad/$name`
 
 	prio=`sed -ne "1!p" $ad/$name | sed -e "s/\(.*\) \(.*\)/\2 \1/g" | sort -nr | head -n 1 | sed 's/ [^ ]*$//'`
 	if [ -z "$prio" ]; then
