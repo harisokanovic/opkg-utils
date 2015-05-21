@@ -58,7 +58,7 @@ def find_package(name):
           return provider_hash[name]
      return None
 
-def process_dep(dep):
+def process_dep(pkg, dep):
      # Add a provider of the given dependency to the list of required packages
      # unless a provider is already present in this list.
      dep = re.sub("\s*\(.*\)", "", dep)
@@ -83,7 +83,7 @@ def recurse(pkg):
      if pkg.depends:
           deps = split_list(pkg.depends)
           for dep in deps:
-               process_dep(dep)
+               process_dep(pkg, dep)
 
 for root in remaining_args:
      pkgs = find_package(root)
