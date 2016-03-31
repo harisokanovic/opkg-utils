@@ -53,6 +53,10 @@ pkg_appears_sane() {
 		echo "*** Warning: The following files have names ending in '~'.
 You probably want to remove them: " >&2
 		ls -ld $tilde_files
+		if [ $? -ne 0 ]; then
+			echo "*** Error: Fail to list files have names ending in '~'."
+			exit 1
+		fi
 		echo >&2
 	    else
 		echo "*** Removing the following files: $tilde_files"
@@ -66,6 +70,10 @@ You probably want to remove them: " >&2
 		echo "*** Warning: The following files have a UID greater than 99.
 You probably want to chown these to a system user: " >&2
 		ls -ld $large_uid_files
+		if [ $? -ne 0 ]; then
+			echo "*** Error: Fail to list files have a UID greater than 99."
+			exit 1
+		fi
 		echo >&2
 	fi
 	    
