@@ -6,7 +6,6 @@
 # 2003-04-25 rea@sr.unh.edu
 #   Updated to work on Familiar Pre0.7rc1, with busybox tar.
 #   Note it Requires: binutils-ar (since the busybox ar can't create)
-#   For UID debugging it needs a better "find".
 set -e
 
 version=1.0
@@ -47,12 +46,12 @@ pkg_appears_sane() {
 
 	PKG_ERROR=0
 
-	tilde_files=`find . -name '*~'`
+	tilde_files=`find . -name '*~' -ls -printf '\\\n'`
 	if [ -n "$tilde_files" ]; then
 	    if [ "$noclean" = "1" ]; then
 		echo "*** Warning: The following files have names ending in '~'.
 You probably want to remove them: " >&2
-		ls -ld $tilde_files
+		echo -e $tilde_files
 		if [ $? -ne 0 ]; then
 			echo "*** Error: Fail to list files have names ending in '~'."
 			exit 1
@@ -64,12 +63,12 @@ You probably want to remove them: " >&2
 	    fi
 	fi
 
-	large_uid_files=`find . -uid +99 || true`
+	large_uid_files=`find . -uid +99 -ls -printf '\\\n' || true`
 
 	if [ "$ogargs" = "" ]  && [ -n "$large_uid_files" ]; then
 		echo "*** Warning: The following files have a UID greater than 99.
 You probably want to chown these to a system user: " >&2
-		ls -ld $large_uid_files
+		echo -e $large_uid_files
 		if [ $? -ne 0 ]; then
 			echo "*** Error: Fail to list files have a UID greater than 99."
 			exit 1
