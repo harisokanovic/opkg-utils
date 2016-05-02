@@ -86,8 +86,9 @@ You probably want to chown these to a system user: " >&2
 	pkg=`required_field Package`
 	[ "$?" -ne 0 ] && PKG_ERROR=1
 
-	version=`required_field Version | sed 's/Version://; s/^.://g;'`
+	version=`required_field Version`
 	[ "$?" -ne 0 ] && PKG_ERROR=1
+	version=`echo $version | sed 's/Version://; s/^.://g;'`
 
 	arch=`required_field Architecture`
 	[ "$?" -ne 0 ] && PKG_ERROR=1
