@@ -1,18 +1,21 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 
 import sys
 import os
 import getopt
 import pydot
 import opkg
+import six
 
 def usage(more=False):
-    print >>sys.stderr, ( 'Usage: opkg-graph-deps '
+    print(( 'Usage: opkg-graph-deps '
         '[-h] [-d] [-o feed.dot] '
         '[-u <Base_feed_URL>] '
-        '<Paths_to_Packages_files>' )
+        '<Paths_to_Packages_files>' ), file=sys.stderr)
     if more:
-        print >>sys.stderr, '\n'.join( [
+        print('\n'.join( [
 '',
 'Generates a dot formatted dependency graph of an IPK feed.',
 '',
@@ -56,7 +59,7 @@ def usage(more=False):
 '  the alias != (to).',
 ' ipkBrokenDep: Set to "1" if (to) is missing from the feed.',
 '',
-        ] )
+        ] ), file=sys.stderr)
     exit(1)
 
 # optional args
@@ -76,19 +79,19 @@ for (optkey, optval) in opts:
         feed_url = optval
 
 if not index_files:
-    print >>sys.stderr, 'Must specify a path to at least one Packages file'
+    print('Must specify a path to at least one Packages file', file=sys.stderr)
     usage()
 
 def fatal_error(msg):
-    print >>sys.stderr, ('ERROR: ' + str(msg))
+    print(('ERROR: ' + str(msg)), file=sys.stderr)
     exit(1)
 
 def warn(msg):
-    print >>sys.stderr, str(msg)
+    print(str(msg), file=sys.stderr)
 
 def debug(msg):
     if enable_debug:
-        print >>sys.stderr, ('DEBUG: ' + str(msg))
+        print(('DEBUG: ' + str(msg)), file=sys.stderr)
 
 def split_dep_list(lst):
     '''
@@ -190,7 +193,7 @@ for indexFilePath in index_files:
     packages.read_packages_file(indexFilePath)
 
     # add each package
-    for pkgKey in packages.keys():
+    for pkgKey in list(packages.keys()):
         pkg = packages[pkgKey]
 
         # sanity check: verify important attributes are defined for
@@ -228,7 +231,7 @@ for indexFilePath in index_files:
 # provides the alias.
 # These packages are not added to the graph because their implementations
 # are already there.
-for pkgKey, pkg in real_pkg_map.iteritems():
+for pkgKey, pkg in six.iteritems(real_pkg_map):
     for alias in split_dep_list(pkg.provides):
         if alias not in active_pkg_map:
             # add it
@@ -260,7 +263,7 @@ for pkgKey, pkg in real_pkg_map.iteritems():
                 virt_pkg_map[alias].append(pkg)
 
 # Print alternatives for virtual packages
-for pkgKey, pkgList in virt_pkg_map.iteritems():
+for pkgKey, pkgList in six.iteritems(virt_pkg_map):
     if len(pkgList) > 1:
         pkgNameList = ','.join( [x.package for x in pkgList] )
         debug("%s alternate implementations of package %s: %s" % (len(pkgList), pkgKey, pkgNameList))
@@ -271,7 +274,7 @@ for pkgKey, pkgList in virt_pkg_map.iteritems():
 
 # Create stub packages in missing_pkg_map and active_pkg_map for broken
 # dependencies, and add them to the graph.
-for pkgKey, pkg in real_pkg_map.iteritems():
+for pkgKey, pkg in six.iteritems(real_pkg_map):
     for depName in split_dep_list(pkg.depends):
         if not depName in active_pkg_map:
             warn("Broken dependency: %s --> %s (missing)" % (
@@ -288,7 +291,7 @@ for pkgKey, pkg in real_pkg_map.iteritems():
 
 # process dependencies
 # add edges to graph
-for pkgKey, pkg in real_pkg_map.iteritems():
+for pkgKey, pkg in six.iteritems(real_pkg_map):
     for depName in split_dep_list(pkg.depends):
         depPkg = active_pkg_map[depName]
 
@@ -297,10 +300,10 @@ for pkgKey, pkg in real_pkg_map.iteritems():
             broken=(depPkg.package in missing_pkg_map) )
 
 # Results
-print "%s total packages are referenced in the feed" % len(active_pkg_map)
-print " %s real packages (%s collisions)" % ( len(real_pkg_map), real_pkg_replace_count )
-print " %s virtual packages" % len(virt_pkg_map)
-print " %s missing packages" % len(missing_pkg_map)
+print("%s total packages are referenced in the feed" % len(active_pkg_map))
+print(" %s real packages (%s collisions)" % ( len(real_pkg_map), real_pkg_replace_count ))
+print(" %s virtual packages" % len(virt_pkg_map))
+print(" %s missing packages" % len(missing_pkg_map))
 
 # sanity check
 if len(active_pkg_map) != (len(real_pkg_map) + len(virt_pkg_map) + len(missing_pkg_map)):
@@ -308,4 +311,4 @@ if len(active_pkg_map) != (len(real_pkg_map) + len(virt_pkg_map) + len(missing_p
 
 # Write the graph
 graph.write(path=dot_filename)
-print "Graphed at %s" % dot_filename
+print("Graphed at %s" % dot_filename)

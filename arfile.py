@@ -5,12 +5,15 @@ Copyright (c) 2006-7 Paul Sokolovsky
 This file is released under the terms 
 of GNU General Public License v2 or later.
 """
+from __future__ import absolute_import
+from __future__ import print_function
+from builtins import object
 import sys
 import os
 import tarfile 
 
 
-class FileSection:
+class FileSection(object):
     "A class which allows to treat portion of file as separate file object."
 
     def __init__(self, f, offset, size):
@@ -30,6 +33,9 @@ class FileSection:
         else:
             assert False
 
+    def seekable(self):
+        return True 
+
     def tell(self):
 #        print("tell()")
         return self.f.tell() - self.offset
@@ -38,7 +44,7 @@ class FileSection:
 #        print("read(%d)" % size)
         return self.f.read(size)
 
-class ArFile:
+class ArFile(object):
 
     def __init__(self, f, fn):
         self.f = f

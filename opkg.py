@@ -31,6 +31,8 @@
 #        people to say "./control.tar.gz" or "./control" when they package files.
 #        It would be much better to require ./control or disallow ./control (either)
 #        rather than letting people pick.  Some freedoms aren't worth their cost.
+from __future__ import absolute_import
+from __future__ import print_function
 
 import tempfile
 import os
@@ -44,7 +46,7 @@ import arfile
 import tarfile
 import textwrap
 
-class Version:
+class Version(object):
     """A class for holding parsed package version information."""
     def __init__(self, epoch, version):
         self.epoch = epoch
@@ -113,7 +115,7 @@ def parse_version(versionstr):
         epoch = int(epochstr)
     return Version(epoch, versionstr)
 
-class Package:
+class Package(object):
     """A class for creating objects to manipulate (e.g. create) opkg
        packages."""
 
@@ -165,7 +167,6 @@ class Package:
             ar = arfile.ArFile(f, fn)
             tarStream = ar.open("control.tar.gz")
             tarf = tarfile.open("control.tar.gz", "r", tarStream)
-
             try:
                 control = tarf.extractfile("control")
             except KeyError:
@@ -175,7 +176,6 @@ class Package:
             except TypeError as e:
                 sys.stderr.write("Cannot read control file '%s' - %s\n" % (fn, e))
             control.close()
-
         self.scratch_dir = None
         self.file_dir = None
         self.meta_dir = None
@@ -217,8 +217,11 @@ class Package:
         line = control.readline()
         while 1:
             if not line: break
+            # Decode if stream has byte strings
+            if not isinstance(line, str):
+                line = line.decode()
             line = line.rstrip()
-            lineparts = re.match(r'([\w-]*?):\s*(.*)', str(line))
+            lineparts = re.match(r'([\w-]*?):\s*(.*)', line)
             if lineparts:
                 name = lineparts.group(1).lower()
                 value = lineparts.group(2)
@@ -378,7 +381,7 @@ class Package:
         tarStream = ar.open("data.tar.gz")
         tarf = tarfile.open("data.tar.gz", "r", tarStream)
         self.file_list = tarf.getnames()
-        self.file_list = map(lambda a: ["./", ""][a.startswith("./")] + a, self.file_list)
+        self.file_list = [["./", ""][a.startswith("./")] + a for a in self.file_list]
 
         f.close()
         return self.file_list
@@ -490,7 +493,7 @@ class Package:
         #       are being destroyed?  -- a7r
         pass
 
-class Packages:
+class Packages(object):
     """A currently unimplemented wrapper around the opkg utility."""
     def __init__(self):
         self.packages = {}
