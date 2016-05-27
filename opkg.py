@@ -533,7 +533,7 @@ class Packages(object):
         names = list(self.packages.keys())
         names.sort()
         for name in names:
-            f.write(self.packages[name].__repr__())
+            f.write(self.packages[name].__str__())
         return    
 
     def keys(self):
