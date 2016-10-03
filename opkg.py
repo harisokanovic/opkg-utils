@@ -478,7 +478,9 @@ class Package(object):
         if self.source: out = out + "Source: %s\n" % (self.source)
         if self.description:
             printable_description = textwrap.dedent(self.description).strip()
-            out = out + "Description: %s\n" % textwrap.fill(printable_description, width=74, initial_indent=' ', subsequent_indent=' ')
+            summary = printable_description.split('\n', 1)[0]
+            printable_description = printable_description.split('\n', 1)[-1].strip()
+            out = out + "Description: %s\n%s\n" % (summary, textwrap.fill(printable_description, width=74, initial_indent=' ', subsequent_indent=' '))
         if self.oe: out = out + "OE: %s\n" % (self.oe)
         if self.homepage: out = out + "HomePage: %s\n" % (self.homepage)
         if self.license: out = out + "License: %s\n" % (self.license)
