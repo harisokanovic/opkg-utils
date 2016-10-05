@@ -195,20 +195,20 @@ while getopts "cCg:ho:vO" opt; do
 	g ) group=$OPTARG
 	    ogargs="$ogargs --group=$group"
 	    ;;
-        c ) outer=tar
-            ;;
-        C ) noclean=1
-            ;;
+	c ) outer=tar
+	    ;;
+	C ) noclean=1
+	    ;;
 	v ) echo $version
 	    exit 0
 	    ;;
-	h ) 	
-	    echo $usage  >&2 
+	h )
+	    echo $usage  >&2
 	    exit 0
 	    ;;
-	\? ) 	
+	\? )
 	    echo $usage  >&2
-	esac
+    esac
 done
 
 
