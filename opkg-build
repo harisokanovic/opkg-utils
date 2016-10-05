@@ -167,6 +167,7 @@ ogargs=""
 outer=ar
 noclean=0
 opkext=0
+compressor=gzip
 
 # Determine if tar supports the --format argument by checking the help output.
 #
@@ -184,8 +185,26 @@ then
     tarformat="--format=gnu"
 fi
 
-usage="Usage: $0 [-c] [-C] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
-while getopts "cCg:ho:vO" opt; do
+compressor_ext() {
+    case $1 in
+	gzip)
+	    echo gz
+	    ;;
+	bzip2)
+	    echo bz2
+	    ;;
+	xz)
+	    echo xz
+	    ;;
+	*)
+	    echo "*** Error: unsupported compression scheme: $1" >&2
+	    exit 1
+	    ;;
+    esac
+}
+
+usage="Usage: $0 [-c] [-C] [-Z compressor] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
+while getopts "cCg:ho:vOZ:" opt; do
     case $opt in
 	o ) owner=$OPTARG
 	    ogargs="--owner=$owner"
@@ -199,6 +218,8 @@ while getopts "cCg:ho:vO" opt; do
 	    ;;
 	C ) noclean=1
 	    ;;
+	Z ) compressor=$OPTARG
+	    ;;
 	v ) echo $version
 	    exit 0
 	    ;;
@@ -211,6 +232,7 @@ while getopts "cCg:ho:vO" opt; do
     esac
 done
 
+cext=$(compressor_ext $compressor)
 
 shift $(($OPTIND - 1))
 
@@ -258,7 +280,7 @@ tmp_dir=$dest_dir/IPKG_BUILD.$$
 mkdir $tmp_dir
 
 echo $CONTROL > $tmp_dir/tarX
-( cd $pkg_dir && tar $ogargs -X $tmp_dir/tarX -cz $tarformat -f $tmp_dir/data.tar.gz . )
+( cd $pkg_dir && tar $ogargs -X $tmp_dir/tarX -c --$compressor $tarformat -f $tmp_dir/data.tar.$cext . )
 ( cd $pkg_dir/$CONTROL && tar $ogargs -cz $tarformat -f $tmp_dir/control.tar.gz . )
 rm $tmp_dir/tarX
 
@@ -272,12 +294,12 @@ fi
 
 rm -f $pkg_file
 if [ "$outer" = "ar" ] ; then
-  ( cd $tmp_dir && ar -crf $pkg_file ./debian-binary ./control.tar.gz ./data.tar.gz )
+  ( cd $tmp_dir && ar -crf $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
 else
-  ( cd $tmp_dir && tar -cz $tarformat -f $pkg_file ./debian-binary ./control.tar.gz ./data.tar.gz )
+  ( cd $tmp_dir && tar -cz $tarformat -f $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
 fi
 
-rm $tmp_dir/debian-binary $tmp_dir/data.tar.gz $tmp_dir/control.tar.gz
+rm $tmp_dir/debian-binary $tmp_dir/data.tar.$cext $tmp_dir/control.tar.gz
 rmdir $tmp_dir
 
 echo "Packaged contents of $pkg_dir into $pkg_file"
