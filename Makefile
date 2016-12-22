@@ -4,10 +4,10 @@ UTILS = opkg-build opkg-unbuild opkg-make-index opkg.py opkg-list-fields \
 
 MANPAGES = opkg-build.1
 
-DESTDIR=
-PREFIX=/usr/local
-bindir=$(PREFIX)/bin
-mandir=$(PREFIX)/man
+DESTDIR =
+PREFIX ?= /usr/local
+bindir ?= $(PREFIX)/bin
+mandir ?= $(PREFIX)/man
 
 .SUFFIXES: .1
 
