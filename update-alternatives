@@ -90,6 +90,9 @@ add_alt() {
 	local path="$2"
 	local priority="$3"
 	remove_alt $name $path
+	if grep -qw "$priority" $ad/$name; then
+		echo "Warn: update-alternatives: $name has multiple providers with the same priority, please check $ad/$name for details"
+	fi
 	echo "$path $priority" >> $ad/$name
 }
 
