@@ -501,10 +501,15 @@ class Packages(object):
         self.packages = {}
         return
 
-    def add_package(self, pkg):
+    def add_package(self, pkg, opt_a=0):
         package = pkg.package
         arch = pkg.architecture
-        name = ("%s:%s" % (package, arch))
+        ver = pkg.version
+        if opt_a:
+            name = ("%s:%s:%s" % (package, arch, ver))
+        else:
+            name = ("%s:%s" % (package, arch))
+
         if (name not in self.packages):
             self.packages[name] = pkg
         
