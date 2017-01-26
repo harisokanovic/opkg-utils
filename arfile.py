@@ -89,7 +89,11 @@ class ArFile(object):
                 l = l[field_len:]
 #            print(descriptor)
             size = int(descriptor[5])
-            memberName = descriptor[0][:-1]
+            # Check for optional / terminator
+            if descriptor[0][-1] == "/":
+              memberName = descriptor[0][:-1]
+            else:
+              memberName = descriptor[0]
             self.directory[memberName] = descriptor + [self.f.tell()]
 #            print(("read:", memberName))
             if memberName == fname:
