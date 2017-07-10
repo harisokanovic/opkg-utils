@@ -164,8 +164,12 @@ class Package(object):
 
             ## sys.stderr.write("  extracting control.tar.gz from %s\n"% (fn,)) 
 
-            ar = arfile.ArFile(f, fn)
-            tarStream = ar.open("control.tar.gz")
+            if tarfile.is_tarfile(fn):
+                tar = tarfile.open(fn, "r", f)
+                tarStream = tar.extractfile("./control.tar.gz")
+            else:
+                ar = ArFile(f, fn)
+                tarStream = ar.open("control.tar.gz")
             tarf = tarfile.open("control.tar.gz", "r", tarStream)
             try:
                 control = tarf.extractfile("control")
