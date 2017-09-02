@@ -66,7 +66,7 @@ pkg_appears_sane_control() {
 	required_field Description >/dev/null
 
 	if echo $pkg | grep '[^a-z0-9.+-]'; then
-		echo "opkg-build: Error: Package name $name contains illegal characters, (other than [a-z0-9.+-])"
+		echo "opkg-build: Error: Package name $pkg contains illegal characters, (other than [a-z0-9.+-])"
 		PKG_ERROR=1;
 	fi
 
