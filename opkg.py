@@ -168,7 +168,7 @@ class Package(object):
                 tar = tarfile.open(fn, "r", f)
                 tarStream = tar.extractfile("./control.tar.gz")
             else:
-                ar = ArFile(f, fn)
+                ar = arfile.ArFile(f, fn)
                 tarStream = ar.open("control.tar.gz")
             tarf = tarfile.open("control.tar.gz", "r", tarStream)
             try:
