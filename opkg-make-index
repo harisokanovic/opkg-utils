@@ -11,7 +11,7 @@ import re
 verbose = 0
 
 def usage():
-     sys.stderr.write("%s [-h] [-s] [-m] [-a] [-l Packages.filelist] [-p Packages] [-r Packages.old] [-L localesdir] [-v] packagesdir\n" % (sys.argv[0],))
+     sys.stderr.write("%s [-h] [-s] [-m] [-a] [-f] [-l Packages.filelist] [-p Packages] [-r Packages.old] [-L localesdir] [-v] packagesdir\n" % (sys.argv[0],))
      sys.exit(-1)
 
 def to_morgue(filename):
@@ -43,7 +43,8 @@ stamplist_filename = "Packages.stamps"
 opt_s = 0
 opt_m = 0
 opt_a = 0
-(opts, remaining_args) = getopt.getopt(sys.argv[1:], "hl:p:vsmr:L:a")
+opt_f = 0
+(opts, remaining_args) = getopt.getopt(sys.argv[1:], "hl:p:vsmr:L:af")
 for (optkey, optval) in opts:
      if optkey == '-h': 
           usage()
@@ -64,6 +65,8 @@ for (optkey, optval) in opts:
           locales_dir = optval
      if optkey == '-a':
           opt_a = 1
+     if optkey == '-f':
+          opt_f = 1
 
 if ( not remaining_args ):
      usage()
@@ -81,7 +84,7 @@ if old_filename:
      if (verbose):
           sys.stderr.write("Reading package list from " + old_filename + "\n")
      old_packages = opkg.Packages()
-     old_packages.read_packages_file(old_filename)
+     old_packages.read_packages_file(old_filename, opt_f)
      for k in list(old_packages.packages.keys()):
           p = old_packages.packages[k]
           old_pkg_hash[p.filename] = p
@@ -122,7 +125,7 @@ for abspath in files:
      if not pkg:
           if (verbose):
                sys.stderr.write("Reading info for package %s\n" % (filename,))
-          pkg = opkg.Package(abspath, relpath=pkg_dir)
+          pkg = opkg.Package(abspath, relpath=pkg_dir, all_fields=opt_f)
 
      if opt_a:
           pkg_key = ("%s:%s:%s" % (pkg.package, pkg.architecture, pkg.version))

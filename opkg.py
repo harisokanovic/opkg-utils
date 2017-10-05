@@ -45,6 +45,7 @@ from stat import ST_SIZE
 import arfile
 import tarfile
 import textwrap
+import collections
 
 class Version(object):
     """A class for holding parsed package version information."""
@@ -123,7 +124,7 @@ class Package(object):
     # relpath: If this argument is set, the file path is given relative to this
     #   path when a string representation of the Package object is created. If
     #   this argument is not set, the basename of the file path is given.
-    def __init__(self, fn=None, relpath=None):
+    def __init__(self, fn=None, relpath=None, all_fields=None):
         self.package = None
         self.version = 'none'
         self.parsed_version = None
@@ -153,6 +154,7 @@ class Package(object):
         self.fn = fn
         self.license = None
 
+        self.user_defined_fields = collections.OrderedDict()
         if fn:
             # see if it is deb format
             f = open(fn, "rb")
@@ -176,7 +178,7 @@ class Package(object):
             except KeyError:
                 control = tarf.extractfile("./control")
             try:
-                self.read_control(control)
+                self.read_control(control, all_fields)
             except TypeError as e:
                 sys.stderr.write("Cannot read control file '%s' - %s\n" % (fn, e))
             control.close()
@@ -215,7 +217,7 @@ class Package(object):
             self.size = stat[ST_SIZE]
         return int(self.size)
 
-    def read_control(self, control):
+    def read_control(self, control, all_fields=None):
         import os
 
         line = control.readline()
@@ -227,19 +229,22 @@ class Package(object):
             line = line.rstrip()
             lineparts = re.match(r'([\w-]*?):\s*(.*)', line)
             if lineparts:
-                name = lineparts.group(1).lower()
+                name = lineparts.group(1)
+                name_lowercase = name.lower()
                 value = lineparts.group(2)
                 while 1:
                     line = control.readline().rstrip()
                     if not line: break
                     if line[0] != ' ': break
                     value = value + '\n' + line
-                if name == 'size':
+                if name_lowercase == 'size':
                     self.size = int(value)
-                elif name == 'md5sum':
+                elif name_lowercase == 'md5sum':
                     self.md5 = value
-                elif name in self.__dict__:
-                    self.__dict__[name] = value
+                elif name_lowercase in self.__dict__:
+                    self.__dict__[name_lowercase] = value
+                elif all_fields:
+                    self.user_defined_fields[name] = value
                 else:
                     print("Lost field %s, %s" % (name,value))
                     pass
@@ -486,6 +491,9 @@ class Package(object):
         if self.license: out = out + "License: %s\n" % (self.license)
         if self.priority: out = out + "Priority: %s\n" % (self.priority)
         if self.tags: out = out + "Tags: %s\n" % (self.tags)
+        if self.user_defined_fields:
+            for k, v in self.user_defined_fields.items():
+                out = out + "%s: %s\n" % (k, v)
         out = out + "\n"
 
         return out
@@ -519,12 +527,12 @@ class Packages(object):
         else:
             return 1
 
-    def read_packages_file(self, fn):
+    def read_packages_file(self, fn, all_fields=None):
         f = open(fn, "r")
         while True:
             pkg = Package()
             try:
-                pkg.read_control(f)
+                pkg.read_control(f, all_fields)
             except TypeError as e:
                 sys.stderr.write("Cannot read control file '%s' - %s\n" % (fn, e))
                 continue
