@@ -230,7 +230,7 @@ class Package(object):
                 name = lineparts.group(1).lower()
                 value = lineparts.group(2)
                 while 1:
-                    line = control.readline()
+                    line = control.readline().rstrip()
                     if not line: break
                     if line[0] != ' ': break
                     value = value + '\n' + line
@@ -480,11 +480,7 @@ class Package(object):
         if self.installed_size: out = out + "InstalledSize: %d\n" % int(self.installed_size)
         if self.filename: out = out + "Filename: %s\n" % (self.filename)
         if self.source: out = out + "Source: %s\n" % (self.source)
-        if self.description:
-            printable_description = textwrap.dedent(self.description).strip()
-            summary = printable_description.split('\n', 1)[0]
-            printable_description = printable_description.split('\n', 1)[-1].strip()
-            out = out + "Description: %s\n%s\n" % (summary, textwrap.fill(printable_description, width=74, initial_indent=' ', subsequent_indent=' '))
+        if self.description: out = out + "Description: %s\n" % (self.description)
         if self.oe: out = out + "OE: %s\n" % (self.oe)
         if self.homepage: out = out + "HomePage: %s\n" % (self.homepage)
         if self.license: out = out + "License: %s\n" % (self.license)
