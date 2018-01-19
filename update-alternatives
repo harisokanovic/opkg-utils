@@ -80,7 +80,7 @@ remove_alt() {
 	[ ! -f $ad/$name ] && return 0
 
 	path=`echo $path | protect_slashes | protect_special_character`
-	sed -ne "/^$path\>.*/!p" $ad/$name > $ad/$name.new
+	sed -ne "/^$path\s.*/!p" $ad/$name > $ad/$name.new
 	mv $ad/$name.new $ad/$name
 }
 
