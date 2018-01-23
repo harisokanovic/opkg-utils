@@ -54,8 +54,11 @@ register_alt() {
 	if [ -e "$ad/$name" ]; then
 		local olink=`head -n 1 $ad/$name`
 		if [ "$link" != "$olink" ]; then
-			echo "update-alternatives: Error: cannot register alternative $name to $link since it is already registered to $olink" >&2
-			return 1
+			echo "update-alternatives: renaming $name link from $olink to $link"
+			local link_str=`echo $link | protect_slashes`
+			sed -e "1s/.*/$link_str/" $ad/$name > $ad/$name.new
+			mv $ad/$name.new $ad/$name
+			mv $olink $link
 		fi
 	else
 		echo "$link" > "$ad/$name"
