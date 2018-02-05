@@ -149,7 +149,8 @@ outer=ar
 noclean=0
 opkext=0
 compressor=gzip
-compressorargs="-9n"
+zipargs="-9n"
+compressorargs=""
 
 # Determine if tar supports the --format argument by checking the help output.
 #
@@ -223,13 +224,12 @@ done
 
 cext=$(compressor_ext $compressor)
 
+# pgzip requires -T to avoid timestamps on the gzip archive
+if gzip --help 2>&1 | grep -- "-T" > /dev/null; then
+	zipargs="-9nT"
+fi
 if [ $compressor = "gzip" ] ; then
-	# pgzip requires -T to avoid timestamps on the gzip archive
-	if gzip --help 2>&1 | grep -- "-T" > /dev/null; then
-		compressorargs="-9nT"
-	fi
-else
-	compressorargs=""
+	compressorargs=$zipargs
 fi
 
 shift $(($OPTIND - 1))
@@ -281,7 +281,7 @@ build_date="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 
 echo $CONTROL > $tmp_dir/tarX
 ( cd $pkg_dir && tar $ogargs --sort=name --mtime=$build_date -X $tmp_dir/tarX -c $tarformat . | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
-( cd $pkg_dir/$CONTROL && tar $ogargs --sort=name --mtime=$build_date -c $tarformat . | gzip $compressorargs > $tmp_dir/control.tar.gz )
+( cd $pkg_dir/$CONTROL && tar $ogargs --sort=name --mtime=$build_date -c $tarformat . | gzip $zipargs > $tmp_dir/control.tar.gz )
 rm $tmp_dir/tarX
 
 echo "2.0" > $tmp_dir/debian-binary
@@ -296,7 +296,7 @@ rm -f $pkg_file
 if [ "$outer" = "ar" ] ; then
   ( cd $tmp_dir && ar -crf $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
 else
-  ( cd $tmp_dir && tar -c --sort=name --mtime=$build_date $tarformat ./debian-binary ./control.tar.gz ./data.tar.$cext | gzip $compressorargs > $pkg_file )
+  ( cd $tmp_dir && tar -c --sort=name --mtime=$build_date $tarformat ./debian-binary ./control.tar.gz ./data.tar.$cext | gzip $zipargs > $pkg_file )
 fi
 
 rm $tmp_dir/debian-binary $tmp_dir/data.tar.$cext $tmp_dir/control.tar.gz
