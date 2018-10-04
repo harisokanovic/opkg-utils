@@ -170,7 +170,7 @@ fi
 
 compressor_ext() {
     case $1 in
-	gzip)
+	gzip|pigz)
 	    echo gz
 	    ;;
 	bzip2)
@@ -230,6 +230,10 @@ if gzip --help 2>&1 | grep -- "-T" > /dev/null; then
 fi
 if [ $compressor = "gzip" ] ; then
 	compressorargs=$zipargs
+elif [ $compressor = "pigz" ] ; then
+	if $compressor --help 2>&1 | grep -- "-T" > /dev/null; then
+		compressorargs="-9nT"
+	fi
 fi
 
 tsortargs=
@@ -337,7 +341,7 @@ Stop with an error if any files ending with B<~> are found. The default behaviou
 
 =item B<-Z> I<compressor>
 
-Specify which compression type to use when building a package. Allowed values are B<gzip>, B<bzip2> and B<xz> (default is B<gzip>).
+Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2> and B<xz> (default is B<gzip>).
 
 =item B<-O>
 
