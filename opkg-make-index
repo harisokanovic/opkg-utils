@@ -115,12 +115,12 @@ for abspath in files:
      pkg = None
      fnameStat = os.stat(abspath)
      if filename in old_pkg_hash:
-          if filename in pkgsStamps and int(fnameStat.st_mtime) == pkgsStamps[filename]:
+          if filename in pkgsStamps and int(fnameStat.st_ctime) == pkgsStamps[filename]:
             if (verbose):
                sys.stderr.write("Found %s in Packages\n" % (filename,))
             pkg = old_pkg_hash[filename]
           else:
-               sys.stderr.write("Found %s in Packages, but mtime differs - re-reading\n" % (filename,))
+               sys.stderr.write("Found %s in Packages, but ctime differs - re-reading\n" % (filename,))
 
      if not pkg:
           if (verbose):
@@ -137,7 +137,7 @@ for abspath in files:
      else:
           old_filename = ""
      s = packages.add_package(pkg, opt_a)
-     pkgsStamps[filename] = fnameStat.st_mtime
+     pkgsStamps[filename] = fnameStat.st_ctime
      if s == 0:
           if old_filename:
                # old package was displaced by newer
