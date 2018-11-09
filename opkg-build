@@ -189,12 +189,12 @@ compressor_ext() {
 : <<=cut
 =head1 SYNOPSIS
 
-B<opkg-build> [B<-c>] [B<-C>] [B<-Z> I<compressor>] [B<-O>] [B<-o> I<owner>] [B<-g> I<group>] I<pkg_directory> [I<destination_directory>]
+B<opkg-build> [B<-c>] [B<-C>] [B<-Z> I<compressor>] [B<-a>] [B<-O>] [B<-o> I<owner>] [B<-g> I<group>] I<pkg_directory> [I<destination_directory>]
 
 =cut
 
-usage="Usage: $0 [-c] [-C] [-Z compressor] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
-while getopts "cCg:ho:vOZ:" opt; do
+usage="Usage: $0 [-c] [-C] [-Z compressor] [-a] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
+while getopts "a:cCg:ho:vOZ:" opt; do
     case $opt in
 	o ) owner=$OPTARG
 	    ogargs="--owner=$owner"
@@ -209,6 +209,8 @@ while getopts "cCg:ho:vOZ:" opt; do
 	C ) noclean=1
 	    ;;
 	Z ) compressor=$OPTARG
+	    ;;
+	a ) compressorargs=$OPTARG
 	    ;;
 	v ) echo $version
 	    exit 0
@@ -228,11 +230,14 @@ cext=$(compressor_ext $compressor)
 if gzip --help 2>&1 | grep -- "-T" > /dev/null; then
 	zipargs="-9nT"
 fi
-if [ $compressor = "gzip" ] ; then
-	compressorargs=$zipargs
-elif [ $compressor = "pigz" ] ; then
-	if $compressor --help 2>&1 | grep -- "-T" > /dev/null; then
-		compressorargs="-9nT"
+
+if [ compressorargs = "" ] ; then
+	if [ $compressor = "gzip" ] ; then
+		compressorargs=$zipargs
+	elif [ $compressor = "pigz" ] ; then
+		if $compressor --help 2>&1 | grep -- "-T" > /dev/null; then
+			compressorargs="-9nT"
+		fi
 	fi
 fi
 
@@ -342,6 +347,10 @@ Stop with an error if any files ending with B<~> are found. The default behaviou
 =item B<-Z> I<compressor>
 
 Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2> and B<xz> (default is B<gzip>).
+
+=item B<-a> I<compressor-args>
+
+Specify the arguments used by the compressor. Overrides the default values.
 
 =item B<-O>
 
