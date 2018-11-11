@@ -58,7 +58,7 @@ register_alt() {
 			local link_str=`echo $link | protect_slashes`
 			sed -e "1s/.*/$link_str/" $ad/$name > $ad/$name.new
 			mv $ad/$name.new $ad/$name
-			mv $olink $link
+			mv $OPKG_OFFLINE_ROOT$olink $OPKG_OFFLINE_ROOT$link
 		fi
 	else
 		echo "$link" > "$ad/$name"
