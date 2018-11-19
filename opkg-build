@@ -179,6 +179,10 @@ compressor_ext() {
 	xz)
 	    echo xz
 	    ;;
+	lz4)
+	    echo lz4
+	    ;;
+
 	*)
 	    echo "*** Error: unsupported compression scheme: $1" >&2
 	    exit 1
@@ -346,7 +350,7 @@ Stop with an error if any files ending with B<~> are found. The default behaviou
 
 =item B<-Z> I<compressor>
 
-Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2> and B<xz> (default is B<gzip>).
+Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2>, B<lz4> and B<xz> (default is B<gzip>).
 
 =item B<-a> I<compressor-args>
 
