@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import getopt
+import argparse
 import sys
 import os
 import posixpath
@@ -13,12 +13,6 @@ import re
 import subprocess
 
 import opkg
-
-def usage():
-    """ Print help """
-    sys.stderr.write("%s [-h] [-s] [-m] [-a] [-f] [-l Packages.filelist] [-p Packages]"
-                     " [-r Packages.old] [-L localesdir] [-v] packagesdir\n" % (sys.argv[0],))
-    sys.exit(-1)
 
 def to_morgue(filename, pkg_dir, verbose):
     """ Move files to morgue folder """
@@ -45,44 +39,35 @@ def to_locale(filename, locale, pkg_dir, locales_dir, verbose):
 
 def main():
     """ Script entry point """
-    verbose = 0
-    locales_dir = None
-    old_filename = None
-    packages_filename = None
-    filelist_filename = None
     stamplist_filename = "Packages.stamps"
-    opt_s = 0
-    opt_m = 0
-    opt_a = 0
-    opt_f = 0
-    (opts, remaining_args) = getopt.getopt(sys.argv[1:], "hl:p:vsmr:L:af")
-    for (optkey, optval) in opts:
-        if optkey == '-h':
-            usage()
-        if optkey == '-s':
-            opt_s = 1
-        if optkey == '-p':
-            packages_filename = optval
-            stamplist_filename = optval + ".stamps"
-        if optkey == '-l':
-            filelist_filename = optval
-        if optkey == '-v':
-            verbose = 1
-        if optkey == '-m':
-            opt_m = 1
-        if optkey == '-r':
-            old_filename = optval
-        if optkey == '-L':
-            locales_dir = optval
-        if optkey == '-a':
-            opt_a = 1
-        if optkey == '-f':
-            opt_f = 1
 
-    if not remaining_args:
-        usage()
+    parser = argparse.ArgumentParser(description='Opkg index creation tool')
+    parser.add_argument('-s', dest='opt_s', default=0, action="store_true",
+                        help='Old simulation mode')
+    parser.add_argument('-m', dest='opt_m', action="store_true", help='Archive old packages')
+    parser.add_argument('-a', dest='opt_a', action='store_true', help='Add version information')
+    parser.add_argument('-f', dest='opt_f', action='store_true', help='Include user-defined fields')
+    parser.add_argument('-l', dest='filelist_filename', default=None, help='Packages filelist name')
+    parser.add_argument('-p', dest='packages_filename', default=None, help='Package index filename')
+    parser.add_argument('-r', dest='old_filename', help='Old Package index filename')
+    parser.add_argument('-L', dest='locales_dir', help='Locales dirname')
+    parser.add_argument('-v', dest='verbose', action="store_true", default=0, help='Verbose output')
+    parser.add_argument('packagesdir', help='Directory to be indexed')
+    args = parser.parse_args()
 
-    pkg_dir = remaining_args[0]
+    opt_s = args.opt_s
+    packages_filename = args.packages_filename
+    filelist_filename = args.filelist_filename
+    verbose = args.verbose
+    opt_m = args.opt_m
+    old_filename = args.old_filename
+    locales_dir = args.locales_dir
+    opt_a = args.opt_a
+    opt_f = args.opt_f
+    pkg_dir = args.packagesdir
+
+    if packages_filename:
+        stamplist_filename = packages_filename + ".stamps"
 
     packages = opkg.Packages()
 
