@@ -190,6 +190,9 @@ class Package(object):
         if name == "md5":
             self._computeFileMD5()
             return self.md5
+        elif name == "sha256":
+            self._computeFileSHA256()
+            return self.sha256
         elif name == 'size':
             return self._get_file_size()
         else:
@@ -208,6 +211,20 @@ class Package(object):
                sum.update(data)
             f.close()
             self.md5 = sum.hexdigest()
+
+    def _computeFileSHA256(self):
+        # compute the SHA256.
+        if not self.fn:
+            self.sha256 = 'Unknown'
+        else:
+            f = open(self.fn, "rb")
+            sum = hashlib.sha256()
+            while True:
+               data = f.read(1024)
+               if not data: break
+               sum.update(data)
+            f.close()
+            self.sha256 = sum.hexdigest()
 
     def _get_file_size(self):
         if not self.fn:
@@ -241,6 +258,8 @@ class Package(object):
                     self.size = int(value)
                 elif name_lowercase == 'md5sum':
                     self.md5 = value
+                elif name_lowercase == 'sha256sum':
+                    self.sha256 = value
                 elif name_lowercase in self.__dict__:
                     self.__dict__[name_lowercase] = value
                 elif all_fields:
@@ -463,7 +482,7 @@ class Package(object):
             ref.parsed_version = parse_version(ref.version)
         return self.parsed_version.compare(ref.parsed_version)
 
-    def __str__(self):
+    def print(self, checksum):
         out = ""
 
         # XXX - Some checks need to be made, and some exceptions
@@ -480,7 +499,10 @@ class Package(object):
         if self.section: out = out + "Section: %s\n" % (self.section)
         if self.architecture: out = out + "Architecture: %s\n" % (self.architecture)
         if self.maintainer: out = out + "Maintainer: %s\n" % (self.maintainer)
-        if self.md5: out = out + "MD5Sum: %s\n" % (self.md5)
+        if 'md5' in checksum:
+            if self.md5: out = out + "MD5Sum: %s\n" % (self.md5)
+        if 'sha256' in checksum:
+            if self.sha256: out = out + "SHA256sum: %s\n" % (self.sha256)
         if self.size: out = out + "Size: %d\n" % int(self.size)
         if self.installed_size: out = out + "InstalledSize: %d\n" % int(self.installed_size)
         if self.filename: out = out + "Filename: %s\n" % (self.filename)

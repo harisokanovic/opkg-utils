@@ -52,6 +52,8 @@ def main():
     parser.add_argument('-r', dest='old_filename', help='Old Package index filename')
     parser.add_argument('-L', dest='locales_dir', help='Locales dirname')
     parser.add_argument('-v', dest='verbose', action="store_true", default=0, help='Verbose output')
+    parser.add_argument('--checksum', action='append', dest='checksum', choices=['md5', 'sha256'],
+                        help='Select checksum type (default is md5)')
     parser.add_argument('packagesdir', help='Directory to be indexed')
     args = parser.parse_args()
 
@@ -64,6 +66,7 @@ def main():
     locales_dir = args.locales_dir
     opt_a = args.opt_a
     opt_f = args.opt_f
+    checksum = args.checksum if args.checksum else ['md5']
     pkg_dir = args.packagesdir
 
     if packages_filename:
@@ -188,9 +191,9 @@ def main():
             if verbose:
                 sys.stderr.write("Writing info for package %s\n" % (pkg.package,))
             if packages_filename:
-                pkgs_file.write(str(pkg))
+                pkgs_file.write(pkg.print(checksum))
             else:
-                print(pkg)
+                print(pkg.print(checksum))
         except OSError as ex:
             sys.stderr.write("Package %s disappeared on us!\n(%s)\n" % (name, ex))
             continue
