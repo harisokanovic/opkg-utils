@@ -297,10 +297,12 @@ mkdir $tmp_dir
 
 build_date="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 
-echo $CONTROL > $tmp_dir/tarX
-( cd $pkg_dir && tar $ogargs $tsortargs --mtime=@$build_date -X $tmp_dir/tarX -c $tarformat . | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
-( cd $pkg_dir/$CONTROL && tar $ogargs $tsortargs --mtime=@$build_date -c $tarformat . | gzip $zipargs > $tmp_dir/control.tar.gz )
-rm $tmp_dir/tarX
+( cd $pkg_dir/$CONTROL && find . -type f > $tmp_dir/control_list )
+( cd $pkg_dir && find . -path ./$CONTROL -prune -o -print > $tmp_dir/file_list )
+( cd $pkg_dir && tar $ogargs $tsortargs --no-recursion --mtime=@$build_date -c $tarformat -T $tmp_dir/file_list | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
+( cd $pkg_dir/$CONTROL && tar $ogargs $tsortargs --no-recursion --mtime=@$build_date -c $tarformat -T $tmp_dir/control_list | gzip $zipargs > $tmp_dir/control.tar.gz )
+rm $tmp_dir/file_list
+rm $tmp_dir/control_list
 
 echo "2.0" > $tmp_dir/debian-binary
 
