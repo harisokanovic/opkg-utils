@@ -299,7 +299,7 @@ build_date="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 
 ( cd $pkg_dir/$CONTROL && find . -type f > $tmp_dir/control_list )
 ( cd $pkg_dir && find . -path ./$CONTROL -prune -o -print > $tmp_dir/file_list )
-( cd $pkg_dir && tar $ogargs $tsortargs --no-recursion --mtime=@$build_date -c $tarformat -T $tmp_dir/file_list | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
+( cd $pkg_dir && tar $ogargs $tsortargs --no-recursion -c $tarformat -T $tmp_dir/file_list | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
 ( cd $pkg_dir/$CONTROL && tar $ogargs $tsortargs --no-recursion --mtime=@$build_date -c $tarformat -T $tmp_dir/control_list | gzip $zipargs > $tmp_dir/control.tar.gz )
 rm $tmp_dir/file_list
 rm $tmp_dir/control_list
