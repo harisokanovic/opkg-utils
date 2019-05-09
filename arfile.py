@@ -76,7 +76,7 @@ class ArFile(object):
                 self.directoryRead = True
                 return None
 
-            if l == "\n":
+            if l.decode('ascii') == "\n":
                 l = self.f.readline()
                 if not l: break
             l = l.decode('ascii')
