@@ -23,7 +23,7 @@ install: all
 	for m in $(MANPAGES); \
 	do \
 		install -d $(DESTDIR)$(mandir)/man$${m##*.}; \
-		install -m 644 $(MANPAGES) $(DESTDIR)$(mandir)/man$${m##*.}; \
+		install -m 644 "$$m" $(DESTDIR)$(mandir)/man$${m##*.}; \
 	done
 
 .PHONY: install all
