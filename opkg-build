@@ -297,9 +297,16 @@ mkdir $tmp_dir
 
 build_date="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 
+mtime_args=""
+# --clamp-mtime requires tar > 1.28. Only use it if SOURCE_DATE_EPOCH is set, to avoid having a generic case dependency on tar > 1.28.
+# this setting will make sure files generated at build time have consistent mtimes, for reproducible builds.
+if [ ! -z "$SOURCE_DATE_EPOCH"  ]; then
+    mtime_args="--mtime=@$build_date --clamp-mtime"
+fi
+
 ( cd $pkg_dir/$CONTROL && find . -type f > $tmp_dir/control_list )
 ( cd $pkg_dir && find . -path ./$CONTROL -prune -o -print > $tmp_dir/file_list )
-( cd $pkg_dir && tar $ogargs $tsortargs --no-recursion -c $tarformat -T $tmp_dir/file_list | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
+( cd $pkg_dir && tar $ogargs $tsortargs --no-recursion $mtime_args -c $tarformat -T $tmp_dir/file_list | $compressor $compressorargs > $tmp_dir/data.tar.$cext )
 ( cd $pkg_dir/$CONTROL && tar $ogargs $tsortargs --no-recursion --mtime=@$build_date -c $tarformat -T $tmp_dir/control_list | gzip $zipargs > $tmp_dir/control.tar.gz )
 rm $tmp_dir/file_list
 rm $tmp_dir/control_list
