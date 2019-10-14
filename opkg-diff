@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# SPDX-License-Identifier: GPL-2.0-only
 pkg1=$1
 dir1=`echo $pkg1 | sed s/.opk//`
 dir1=`basename $dir1` 

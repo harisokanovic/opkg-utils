@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-only
 """
 arfile - A module to parse GNU ar archives.
 
