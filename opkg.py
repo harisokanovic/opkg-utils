@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 #   Copyright (C) 2001 Alexander S. Guy <a7r@andern.org>
 #                      Andern Research Labs
