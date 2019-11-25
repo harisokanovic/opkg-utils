@@ -384,6 +384,7 @@ class Package(object):
                 error = subprocess.CalledProcessError(retcode, cmd)
                 error.output = output
                 raise error
+            output = output.decode("utf-8")
             return output
 
         if not self.fn:
